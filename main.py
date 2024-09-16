@@ -14,7 +14,7 @@ client: Client = Client(intents=intents)
 
 async def handle_message_response(message: Message, user_message: str) -> None:
     if not user_message:
-        log_err_local('Received was empty.')
+        log_warn_local('Received was empty.')
         return
     is_private: bool = user_message[0] == '?'
     if is_private:
@@ -28,7 +28,7 @@ async def handle_message_response(message: Message, user_message: str) -> None:
             else:
                 await message.channel.send(response.message, file=response.file)
     except Exception as e:
-        log_err_local(e)
+        log_exception_local(e)
 
 @client.event
 async def on_ready() -> None:

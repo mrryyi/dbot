@@ -30,7 +30,7 @@ def get_response(user_input: str) -> Response:
                 else:
                     return Response(message=message)
             except Exception as e:
-                log_err_local(e)
+                log_exception_local(e)
         else:
             return 'Not a valid dice string. Correct example: "ddice 1d4", "ddice 12d8"'
     
