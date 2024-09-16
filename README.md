@@ -10,6 +10,6 @@ dice 1d13
 dice 5d20
 ```
 
-![alt text](docimages\example.png "Title")
+![There should be an image of a graph here.](https://github.com/mrryyi/dbot/blob/main/docimages/example.png "Title")
 
 Graph is generated in-memory and does not need to be stored to save our precious hardware and time.
