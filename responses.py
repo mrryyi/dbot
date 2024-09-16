@@ -11,12 +11,6 @@ class Response:
 def get_response(user_input: str) -> Response:
     lowered: str = user_input.lower()
 
-    if lowered == '':
-        return Response('Well, you\'re awfully silent...')
-    
-    if lowered == 'hello':
-        return Response('hello')
-    
     # dice thing
     if lowered.startswith('dice '):
         dice_str = lowered[len('dice '):].strip()
