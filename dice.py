@@ -40,12 +40,20 @@ def dice_probability_distribution(dice_to_roll: DiceToRoll) -> dict[int, float]:
     probability_distribution = {sum_: freq / total_outcomes for sum_, freq in frequency_distribution.items()}
     return probability_distribution
 
-def make_probability_graph(probability_distribution) -> BytesIO:
+def make_probability_graph(probability_distribution, result: int = None) -> BytesIO:
     plt.figure(figsize=(10, 6))
-    plt.bar(probability_distribution.keys(), probability_distribution.values(), color='skyblue')
+    bars = plt.bar(probability_distribution.keys(), probability_distribution.values(), color='skyblue')
     plt.xlabel('Possible Result')
     plt.ylabel('Probability')
     plt.title('Probability Distribution')
+
+    # Only highlight if the result is present.
+    if result:
+        # Iterate through the bars and highlight the one that matches the result
+        for bar in bars:
+            if bar.get_x() == result - 0.4:  # Adjust for bar width offset
+                bar.set_color('orange')  # Highlight color for the result bar
+                bar.set_edgecolor('black')  # Optional: set edge color for visibility
 
     # Uncomment to make x labels look like shit given enough x
     #plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))  # Ensure only integer ticks
@@ -80,7 +88,7 @@ def decide_outcome_of_dice(dice_to_roll: DiceToRoll) -> DiceOutcome:
     probability_of_specific_roll = probability_distribution.get(total_roll, 0.0)
 
     # Create a graph of the probability distribution in-memory
-    probability_graph = make_probability_graph(probability_distribution)
+    probability_graph = make_probability_graph(probability_distribution, total_roll)
 
     dice_outcome = DiceOutcome(total_roll        = total_roll,
                                probability       = probability_of_specific_roll,
