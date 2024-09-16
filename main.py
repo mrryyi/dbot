@@ -12,7 +12,7 @@ intents: Intents = Intents.default()
 intents.message_content = True 
 client: Client = Client(intents=intents)
 
-async def send_message(message: Message, user_message: str) -> None:
+async def handle_message_response(message: Message, user_message: str) -> None:
     if not user_message:
         log_err_local('Received was empty.')
         return
@@ -46,7 +46,7 @@ async def on_message(message: Message) -> None:
     print(f'[{channel}] {user_name}: {user_message}')
     
     if user_message != '':
-        await send_message(message, user_message)
+        await handle_message_response(message, user_message)
 
 def main() -> None:
     client.run(token=TOKEN)
