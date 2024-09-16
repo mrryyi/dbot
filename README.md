@@ -13,3 +13,13 @@ dice 5d20
 ![There should be an image of a graph here.](https://github.com/mrryyi/dbot/blob/main/docimages/example.png "Title")
 
 Graph is generated in-memory and does not need to be stored to save our precious hardware and time.
+
+## Prerequisites
+
+* Python 3.7 or greater for @dataclass.
+
+```
+pip install discord
+pip install python-dotenv
+pip install matplotlib
+```
