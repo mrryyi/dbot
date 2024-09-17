@@ -20,7 +20,9 @@ def get_response(user_input: str) -> Response:
                 formatted_percentage: str = f"{result.probability:.2%}"
                 message                   = f'{dice_str} RESULT: **{result.total_roll}** ({formatted_percentage})'
                 if result.probability_graph:
-                    return Response(message=message, file=File(result.probability_graph, filename='probability_distribution.png'))
+                    return Response(message=message,
+                                    file=File(result.probability_graph,
+                                              filename='probability_distribution.png'))
                 else:
                     return Response(message=message)
             except Exception as e:
