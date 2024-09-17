@@ -29,8 +29,8 @@ def handle_dice_functionality(lowered: str) -> Optional[Response]:
             break
     
     show_only_graph: bool = 'gnor' in flags
-    show_graph: bool = ('g' in flags) or show_only_graph
-    help: bool = 'help'
+    show_graph: bool      = ('g' in flags) or show_only_graph
+    help: bool            = 'help' in known_flags
 
     if help:
         return Response('Usage examples: \n'
