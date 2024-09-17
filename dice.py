@@ -11,14 +11,24 @@ from matplotlib.ticker import MaxNLocator
 
 @dataclass
 class DiceOutcome:
-    total_roll: int
-    probability: float
+    _outcome: int
+
+@dataclass
+class DiceProbability:
+    _probability: float = None
+    _distribution: dict[int, float] = None
+
+@dataclass
+class DiceProbabilityGraph:
     probability_graph: Optional[BytesIO] = None
 
 @dataclass
 class DiceToRoll:
     amount_of_dice: int
     dice_value: int
+
+def is_valid_dice_str(dice_str: str) -> bool:
+    return bool(re.match(r'^\d+[dD]\d+$', dice_str))
 
 # Not mine
 def dice_probability_distribution(dice_to_roll: DiceToRoll) -> dict[int, float]:
@@ -40,7 +50,7 @@ def dice_probability_distribution(dice_to_roll: DiceToRoll) -> dict[int, float]:
     probability_distribution = {sum_: freq / total_outcomes for sum_, freq in frequency_distribution.items()}
     return probability_distribution
 
-def make_probability_graph(probability_distribution, result: int = None) -> BytesIO:
+def make_probability_graph(probability_distribution: dict[int, float], result: int = None) -> DiceProbabilityGraph:
     plt.figure(figsize=(10, 6))
     bars = plt.bar(probability_distribution.keys(), probability_distribution.values(), color='skyblue')
     plt.xlabel('Possible Result')
@@ -60,15 +70,14 @@ def make_probability_graph(probability_distribution, result: int = None) -> Byte
     #plt.xticks(ticks=list(probability_distribution.keys()))  # Set all possible results as x-ticks
 
     # in-memory rocks.
-    buf = BytesIO()
-    plt.savefig(buf, format='png')
-    buf.seek(0)
+    diceProbabilityGraph = DiceProbabilityGraph
+    diceProbabilityGraph.probability_graph = BytesIO()
+    plt.savefig(diceProbabilityGraph.probability_graph, format='png')
+    diceProbabilityGraph.probability_graph.seek(0)
     plt.close()
 
-    return buf
+    return diceProbabilityGraph
 
-def is_valid_dice_str(dice_str: str) -> bool:
-    return bool(re.match(r'^\d+[dD]\d+$', dice_str))
 
 def parse_dice_str(dice_str: str) -> DiceToRoll:
     try:
@@ -79,31 +88,21 @@ def parse_dice_str(dice_str: str) -> DiceToRoll:
     
     return dice_to_roll
 
-def decide_outcome_of_dice(dice_to_roll: DiceToRoll) -> DiceOutcome:
+def determine_probability(dice_to_roll, specific_result: DiceOutcome = None) -> DiceProbability:
+    diceProbability = DiceProbability 
+    diceProbability._distribution       = dice_probability_distribution(dice_to_roll)    
+    diceProbability._probability = diceProbability._distribution.get(specific_result._outcome, 0.0)
 
-    # roll the dice
-    total_roll = sum(randint(1, dice_to_roll.dice_value) for _ in range(dice_to_roll.amount_of_dice))
-
-    probability_distribution     = dice_probability_distribution(dice_to_roll)    
-    probability_of_specific_roll = probability_distribution.get(total_roll, 0.0)
-
-    # Create a graph of the probability distribution in-memory
-    probability_graph = make_probability_graph(probability_distribution, total_roll)
-
-    dice_outcome = DiceOutcome(total_roll        = total_roll,
-                               probability       = probability_of_specific_roll,
-                               probability_graph = probability_graph)
-    return dice_outcome
+    return diceProbability
 
 def get_dice_to_roll(dice_str: str) -> DiceToRoll:
     dice_to_roll: DiceToRoll = parse_dice_str(dice_str)
     return dice_to_roll
 
+def decide_outcome_of_dice(dice_to_roll: DiceToRoll) -> DiceOutcome:
+    return DiceOutcome(_outcome = sum(randint(1, dice_to_roll.dice_value) for _ in range(dice_to_roll.amount_of_dice)))
+
 def dice_within_reasonable_limit(dice_to_roll: DiceToRoll) -> bool:
     if (dice_to_roll.amount_of_dice + dice_to_roll.dice_value) >= 18:
         return False
     return True
-
-def get_dice_roll(dice_to_roll: DiceToRoll) -> DiceOutcome:
-    outcome: DiceOutcome = decide_outcome_of_dice(dice_to_roll)
-    return outcome

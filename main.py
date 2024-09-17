@@ -22,11 +22,13 @@ async def handle_message_response(message: Message, user_message: str) -> None:
 
     try:
         response: Response = get_response(user_message)
-        if response:
-            if is_private:
-                await message.author.send(response.message, file=response.file)
-            else:
-                await message.channel.send(response.message, file=response.file)
+        if not response:
+            return
+        
+        if is_private:
+            await message.author.send(response.message, file=response.file)
+        else:
+            await message.channel.send(response.message, file=response.file)
     except Exception as e:
         log_exception_local(e)
 
