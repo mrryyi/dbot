@@ -15,23 +15,61 @@ def parse_flags_and_dice_str(parts: List[str]) -> Tuple[List[str], str]:
     return flags, dice_str
 
 def handle_dice_functionality(lowered: str) -> Optional[Response]:
+    known_flags = {'g', 'gnor' 'help'}
+    flags = set()
     
     parts = lowered[len('dice '):].strip().split()
-    flags, dice_str = parse_flags_and_dice_str(parts)
+    
+    dice_str = None
+    for part in parts:
+        if part in known_flags:
+            flags.add(part)
+        else:
+            dice_str = part
+            break
+    
+    show_only_graph: bool = 'gnor' in flags
+    show_graph: bool = ('g' in flags) or show_only_graph
+    help: bool = 'help'
+
+    if help:
+        return Response('Usage examples: \n'
+                        '```'
+                        '"dice 1d4"      - rolls one 4-sided dice.\n'
+                        '"dice g 4d6"    - rolls the dice and shows a probability graph and your result.\n'
+                        '"dice 2d8"      - rolls two 8-sided dice.\n'
+                        '"dice gnor 5d4" - only shows the probability graph of the dice.\n'
+                        '```')
 
     if not is_valid_dice_str(dice_str):
-        return Response('Not a valid dice string. Correct example: "ddice 1d4", "ddice 12d8"')
+        return Response('Not a valid dice string. Correct example: "dice 1d4", "dice 12d8"')
     
+
+
     try:
-        dice_to_roll = get_dice_to_roll(dice_str=dice_str)
+        dice_to_roll: DiceToRoll = get_dice_to_roll(dice_str=dice_str)
+
         if dice_within_reasonable_limit(dice_to_roll=dice_to_roll):
-            result: DiceOutcome       = get_dice_roll(dice_to_roll=dice_to_roll)
-            formatted_percentage: str = f"{result.probability:.2%}"
-            message                   = f'{dice_str} RESULT: **{result.total_roll}** ({formatted_percentage})'
-            if result.probability_graph:
+            result = None
+            result_for_graph = None
+            message: str
+            
+            result:  DiceOutcome = decide_outcome_of_dice(dice_to_roll=dice_to_roll)
+
+            diceProbability: DiceProbability = determine_probability (dice_to_roll=dice_to_roll, specific_result=result) 
+            formatted_percentage: str = f"{diceProbability._probability:.2%}"
+            
+            if not show_only_graph:
+                message: str         = f'{dice_str} RESULT: **{result._outcome}** ({formatted_percentage})'
+            else:
+                message: str = f"{dice_str} probability distribution:"
+            
+            if show_graph:
+                result_for_graph = None if show_only_graph else result._outcome
+                graph = make_probability_graph(diceProbability._distribution, result_for_graph).probability_graph
                 return Response(message=message,
-                                file=File(result.probability_graph,
-                                            filename='probability_distribution.png'))
+                                file=File(graph,
+                                          filename='probability_distribution.png'))
             else:
                 return Response(message=message)
     except Exception as e:
