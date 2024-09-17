@@ -95,7 +95,15 @@ def decide_outcome_of_dice(dice_to_roll: DiceToRoll) -> DiceOutcome:
                                probability_graph = probability_graph)
     return dice_outcome
 
-def get_dice_roll(dice_str: str) -> DiceOutcome:
+def get_dice_to_roll(dice_str: str) -> DiceToRoll:
     dice_to_roll: DiceToRoll = parse_dice_str(dice_str)
+    return dice_to_roll
+
+def dice_within_reasonable_limit(dice_to_roll: DiceToRoll) -> bool:
+    if (dice_to_roll.amount_of_dice + dice_to_roll.dice_value) >= 18:
+        return False
+    return True
+
+def get_dice_roll(dice_to_roll: DiceToRoll) -> DiceOutcome:
     outcome: DiceOutcome = decide_outcome_of_dice(dice_to_roll)
     return outcome
