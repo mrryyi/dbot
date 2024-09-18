@@ -15,7 +15,7 @@ def parse_flags_and_dice_str(parts: List[str]) -> Tuple[List[str], str]:
     return flags, dice_str
 
 def handle_dice_functionality(lowered: str) -> Optional[Response]:
-    known_flags = {'g', 'gnor' 'help'}
+    known_flags = {'g', 'gnor', 'help'}
     flags = set()
     
     parts = lowered[len('dice '):].strip().split()
@@ -30,7 +30,7 @@ def handle_dice_functionality(lowered: str) -> Optional[Response]:
     
     show_only_graph: bool = 'gnor' in flags
     show_graph: bool      = ('g' in flags) or show_only_graph
-    help: bool            = 'help' in known_flags
+    help: bool            = 'help' in flags
 
     if help:
         return Response('Usage examples: \n'
