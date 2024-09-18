@@ -90,8 +90,8 @@ def parse_dice_str(dice_str: str) -> DiceToRoll:
 
 def determine_probability(dice_to_roll, specific_result: DiceOutcome = None) -> DiceProbability:
     diceProbability = DiceProbability 
-    diceProbability._distribution       = dice_probability_distribution(dice_to_roll)    
-    diceProbability._probability = diceProbability._distribution.get(specific_result._outcome, 0.0)
+    diceProbability._distribution = dice_probability_distribution(dice_to_roll)    
+    diceProbability._probability  = diceProbability._distribution.get(specific_result._outcome, 0.0)
 
     return diceProbability
 
