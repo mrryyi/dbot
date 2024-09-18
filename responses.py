@@ -44,8 +44,6 @@ def handle_dice_functionality(lowered: str) -> Optional[Response]:
     if not is_valid_dice_str(dice_str):
         return Response('Not a valid dice string. Correct example: "dice 1d4", "dice 12d8"')
     
-
-
     try:
         dice_to_roll: DiceToRoll = get_dice_to_roll(dice_str=dice_str)
 
@@ -60,7 +58,7 @@ def handle_dice_functionality(lowered: str) -> Optional[Response]:
             formatted_percentage: str = f"{diceProbability._probability:.2%}"
             
             if not show_only_graph:
-                message: str         = f'{dice_str} RESULT: **{result._outcome}** ({formatted_percentage})'
+                message: str = f'{dice_str} RESULT: **{result._outcome}** ({formatted_percentage})'
             else:
                 message: str = f"{dice_str} probability distribution:"
             

@@ -63,7 +63,7 @@ def make_probability_graph(probability_distribution: dict[int, float], result: i
         for bar in bars:
             if bar.get_x() == result - 0.4:  # Adjust for bar width offset
                 bar.set_color('orange')  # Highlight color for the result bar
-                bar.set_edgecolor('black')  # Optional: set edge color for visibility
+                bar.set_edgecolor('black')  # Set edge color for visibility
 
     # Uncomment to make x labels look like shit given enough x
     #plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))  # Ensure only integer ticks
@@ -96,8 +96,7 @@ def determine_probability(dice_to_roll, specific_result: DiceOutcome = None) -> 
     return diceProbability
 
 def get_dice_to_roll(dice_str: str) -> DiceToRoll:
-    dice_to_roll: DiceToRoll = parse_dice_str(dice_str)
-    return dice_to_roll
+    return parse_dice_str(dice_str)
 
 def decide_outcome_of_dice(dice_to_roll: DiceToRoll) -> DiceOutcome:
     return DiceOutcome(_outcome = sum(randint(1, dice_to_roll.dice_value) for _ in range(dice_to_roll.amount_of_dice)))
