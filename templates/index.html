@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Bot Interface with Markdown</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>¨
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+    <h1>Send a Message to the Bot</h1>
+    <form id="botForm">
+        <label for="message">Message:</label>
+        <input type="text" id="message" name="message">
+        <button type="submit">Send</button>
+    </form>
+    
+    <h2>Response:</h2>
+    <div id="response"></div> <!-- The response will be displayed here -->
+
+    <script>
+        document.getElementById('botForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const message = document.getElementById('message').value;
+            const response = await fetch('/send_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: message })
+            });
+            const data = await response.json();
+
+            // Use marked.js to convert the Markdown response to HTML
+            document.getElementById('response').innerHTML = marked.parse(data.response || data.error);
+        });
+    </script>
+</body>
+<style>
+    body{
+        margin:      40px auto;
+        max-width:   650px;
+        line-height: 1.6;
+        font-size:   18px;
+        color:     #444;
+        padding:     0 10px;
+    }
+    h1,h2,h3{ line-height:1.2 }
+</style>
+</html>

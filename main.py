@@ -1,3 +1,7 @@
+from flask import Flask, request, jsonify, render_template
+from threading import Thread
+import asyncio
+from enum import Enum
 from log import *
 from typing import Final
 import os
@@ -8,11 +12,22 @@ from responses import *
 load_dotenv()
 TOKEN: Final[str] = os.getenv('DISCORD_TOKEN')
 
+app = Flask(__name__)
+
 intents: Intents = Intents.default()
 intents.message_content = True 
 client: Client = Client(intents=intents)
 
-async def handle_message_response(message: Message, user_message: str) -> None:
+async def handle_web_message_response(user_message: str) -> str:
+    try:
+        response: Response = get_response(user_message)
+        if not response:
+            return "No response"
+        return response.message
+    except Exception as e:
+        return str(e)
+
+async def handle_discord_message_response(message: Message, user_message: str) -> None:
     if not user_message:
         log_warn_local('Received was empty.')
         return
@@ -32,6 +47,25 @@ async def handle_message_response(message: Message, user_message: str) -> None:
     except Exception as e:
         log_exception_local(e)
 
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+# Flask route to communicate with bot
+@app.route('/send_message', methods=['POST'])
+def send_message():
+    data = request.json
+    user_message = data.get('message')
+    if user_message:
+        # This will return a response from the bot
+        response = asyncio.run(handle_web_message_response(user_message))
+        return jsonify({'response': response})
+    return jsonify({'error': 'No message received.'}), 400
+
+# Start Flask in a separate thread
+def run_flask():
+    app.run(host='0.0.0.0', port=5000)
+
 @client.event
 async def on_ready() -> None:
     log_inf_local(f'{client.user} is now running!')
@@ -48,9 +82,11 @@ async def on_message(message: Message) -> None:
     print(f'[{channel}] {user_name}: {user_message}')
     
     if user_message != '':
-        await handle_message_response(message, user_message)
+        await handle_discord_message_response(message, user_message)
 
 def main() -> None:
+    flask_thread = Thread(target=run_flask)
+    flask_thread.start()
     client.run(token=TOKEN)
 
 if __name__ == '__main__':
