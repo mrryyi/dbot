@@ -1,6 +1,10 @@
 # dbot
 
-For now you can use this bot to roll dice and receive a graph of the probabilities of outcomes for the die roll.
+A discord bot that helps with some aspects of dungeon mastering, such as dice rolls or names.
+
+## Dice
+
+You can roll dice and receive a graph of the probabilities of outcomes for the die roll.
 
 ```
 Examples:
@@ -16,7 +20,25 @@ dice gnor 2d12 - No result, only graph
 
 Graph is generated in-memory and does not need to be stored to save our precious hardware and time.
 
-## Prerequisites
+## Names
+
+Did your players just wonder what your barmaid is called? Or what asked what name their summoned rat has?
+
+No worries! Just type use this bot to 
+
+```
+Examples:
+
+name add kassler knasboll - adds an untaken name, 'Kassler Knasboll'
+name add kASSler kNaSbOlL - ignores case, becomes 'Kassler Knasboll' anyway
+name all                  - lists all names
+name alltaken             - lists all taken names
+name alluntaken           - lists all untaken names
+name random               - gives a random untaken name
+name randomtake           - takes the name that is randomed, so it won't show up in untaken searches 
+```
+
+## Prerequisites for building
 
 * Python 3.7 or greater for @dataclass.
 
@@ -24,4 +46,5 @@ Graph is generated in-memory and does not need to be stored to save our precious
 pip install discord
 pip install python-dotenv
 pip install matplotlib
+pip install sqlite3
 ```
