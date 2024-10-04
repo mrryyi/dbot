@@ -1,4 +1,6 @@
+from dataclasses import dataclass
 from dice import *
+from npc_names import *
 from log import *
 from typing import Optional, List, Tuple
 from discord import File
@@ -8,6 +10,7 @@ class Response:
     message: str
     file: Optional[File] = None
 
+#region dice
 def parse_flags_and_dice_str(parts: List[str]) -> Tuple[List[str], str]:
     # Assume all parts except the last one are flags, and the last one is the dice string
     flags = parts[:-1]
@@ -72,11 +75,135 @@ def handle_dice_functionality(lowered: str) -> Optional[Response]:
                 return Response(message=message)
     except Exception as e:
         log_exception_local(e)
+#endregion
+#region npc_names
+def unsuccessful_response(res: FetchResult) -> Optional[Response]:
+    nicer_status_text: str
+    match res.status:
+        case db_operation_result.GENERAL_ERROR:
+            nicer_status_text = 'General SQL error.'
+        case db_operation_result.ALREADY_EXISTS:
+            nicer_status_text = 'Already exists.'
+        case db_operation_result.NO_QUERY_RESULT:
+            nicer_status_text = 'No data found.'
+    
+    message: str
+    if res.error_message is None:
+        message: str = f'Request failed. Status: {nicer_status_text}'
+    else:
+        message: str = f'Request failed. Status: {nicer_status_text} with error {res.error_message}'   
+    return Response(message=message)
+
+def create_response_random() -> Optional[Response]:
+    res: NameFetchResult = get_random_untaken_name()
+    if res.status != db_operation_result.SUCCESS:
+        return unsuccessful_response(res)
+    
+    return Response(message=res.npc_name.name)
+
+def create_response_randomtake() -> Optional[Response]:
+    res: NameFetchResult = get_random_untaken_name_and_take_it()
+    if res.status != db_operation_result.SUCCESS:
+        return unsuccessful_response(res)
+    
+    return Response(message=res.npc_name.name)
+
+def create_response_insert_name(name_to_add: str) -> Optional[Response]:
+    if not name_to_add:
+        return Response('Please provide a valid name to add.')
+    
+    res: db_operation_result = insert_singular_name(name_to_add)
+
+    match res:
+        case db_operation_result.SUCCESS:
+            return Response(message=f'{name_to_add} added.')
+        case db_operation_result.ALREADY_EXISTS:
+            return Response(message=f'{name_to_add} already exists.')
+        case db_operation_result.GENERAL_ERROR:
+            return Response(message=f'General SQL error.')   
+
+def create_response_several_names(operation: str) -> Optional[Response]:
+    match operation:
+        case 'all':
+            res: NamesFetchResult = get_all_names()
+        case 'alltaken':
+            res: NamesFetchResult = get_all_taken_names()
+        case 'alluntaken':
+            res: NamesFetchResult = get_all_untaken_names()
+        case _:
+            return
+    
+    if res.status != db_operation_result.SUCCESS:
+        return unsuccessful_response(res)
+    
+    if res.npc_names:
+        message = '\n'.join(npc.name + (' (taken)' if npc.taken else '') for npc in res.npc_names)
+    else:
+        message = "No names available."
+
+    return Response(message=message)
+    
+def handle_names_functionality(lowered) -> Optional[Response]:
+    parts = lowered[len('name '):].strip().split()
+    known_flags = {'add',
+                   'all',
+                   'alltaken',
+                   'alluntaken',
+                   'random',
+                   'randomtake',
+                   'help'}
+
+    flags = set()
+    for part in parts:
+        if part in known_flags:
+            flags.add(part)
+    
+    help: bool                                = 'help' in flags
+    add: bool                                 = 'add' in flags
+    get_random_untaken_name: bool             = 'random' in flags
+    get_random_untaken_name_and_take_it: bool = 'randomtake' in flags
+    get_all_names: bool                       = 'all' in flags 
+    get_all_taken_names: bool                 = 'alltaken' in flags 
+    get_all_untaken_names: bool               = 'alluntaken' in flags 
+    
+    if len(flags) > 1:
+        return Response('Only use one flag at a time. Type "name help" for help.')
+    
+    if add:
+         # Everything after add is the name
+        name_to_add = ' '.join(parts[1:]).strip().title()
+        return create_response_insert_name(name_to_add)
+
+    if help:
+        return Response('Usage examples: \n'
+                        '```'
+                        '"name random" - get a random untaken name.\n'
+                        '"name all"    - gets all untaken names.\n'
+                        '"name add Bert Randman" - Adds "Bert Randman" as an untaken name'
+                        '```')
+    
+    try:
+        if get_random_untaken_name:
+            return create_response_random()
+        if get_random_untaken_name_and_take_it:
+            return create_response_randomtake()
+        
+        if get_all_names:
+            return create_response_several_names('all')
+        if get_all_taken_names:
+            return create_response_several_names('alltaken')
+        if get_all_untaken_names:
+            return create_response_several_names('alluntaken')
+    except Exception as e:
+        log_exception_local(e)
+#endregion
 
 def get_response(user_input: str) -> Optional[Response]:
     lowered: str = user_input.lower()
 
     if lowered.startswith('dice '):
         return handle_dice_functionality(lowered)
-
+    if lowered.startswith('name '):
+        return handle_names_functionality(lowered)
+    
     return None
