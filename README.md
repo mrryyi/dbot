@@ -40,7 +40,7 @@ name randomtake           - takes the name that is randomed, so it won't show up
 
 ## Prerequisites for building
 
-* Python 3.7 or greater for @dataclass.
+* Python 3.10 or greater.
 
 ```
 pip install discord
