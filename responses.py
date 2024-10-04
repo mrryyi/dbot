@@ -76,10 +76,7 @@ def handle_dice_functionality(lowered: str) -> Optional[Response]:
     except Exception as e:
         log_exception_local(e)
 #endregion
-
-
 #region npc_names
-
 def unsuccessful_response(res: FetchResult) -> Optional[Response]:
     nicer_status_text: str
     match res.status:
@@ -146,7 +143,6 @@ def create_response_several_names(operation: str) -> Optional[Response]:
 
     return Response(message=message)
     
-
 def handle_names_functionality(lowered) -> Optional[Response]:
     parts = lowered[len('name '):].strip().split()
     known_flags = {'add',
@@ -200,7 +196,6 @@ def handle_names_functionality(lowered) -> Optional[Response]:
             return create_response_several_names('alluntaken')
     except Exception as e:
         log_exception_local(e)
-
 #endregion
 
 def get_response(user_input: str) -> Optional[Response]:
@@ -208,7 +203,7 @@ def get_response(user_input: str) -> Optional[Response]:
 
     if lowered.startswith('dice '):
         return handle_dice_functionality(lowered)
-    
     if lowered.startswith('name '):
         return handle_names_functionality(lowered)
+    
     return None

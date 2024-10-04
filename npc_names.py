@@ -8,7 +8,6 @@ conn = sqlite3.connect('npc_names.db')
 conn.row_factory = sqlite3.Row
 cursor = conn.cursor()
 
-
 #region Datamodel definition
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS npc_names (
@@ -35,7 +34,6 @@ class NpcName:
     datetime_created: str
     datetime_taken: Optional[str]  # Optional, since it can be NULL
 #endregion
-
 #region SQL result helpers.
 class db_operation_result(IntEnum):
     SUCCESS = 0
@@ -48,7 +46,6 @@ class FetchResult:
     status: db_operation_result
     error_message: str = None
 #endregion
-
 #region SQL Inserts
 def insert_singular_name(name: str) -> db_operation_result:
     try:
@@ -70,7 +67,6 @@ def insert_singular_name(name: str) -> db_operation_result:
 
     return db_operation_result.SUCCESS
 #endregion
-
 #region SQL Gets
 @dataclass
 class NameFetchResult(FetchResult):
@@ -158,5 +154,4 @@ def get_all_taken_names() -> NamesFetchResult:
 
 def get_all_untaken_names() -> NamesFetchResult:
     return fetch_names("taken = 0")
-
 #endregion
