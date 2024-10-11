@@ -45,6 +45,14 @@ class db_operation_result(IntEnum):
 class FetchResult:
     status: db_operation_result
     error_message: str = None
+
+@dataclass
+class NameFetchResult(FetchResult):
+    npc_name: NpcName = None
+
+@dataclass
+class NamesFetchResult(FetchResult):
+    npc_names: List[NpcName] = None
 #endregion
 #region SQL Inserts
 def insert_singular_name(name: str) -> db_operation_result:
@@ -68,9 +76,33 @@ def insert_singular_name(name: str) -> db_operation_result:
     return db_operation_result.SUCCESS
 #endregion
 #region SQL Gets
-@dataclass
-class NameFetchResult(FetchResult):
-    npc_name: NpcName = None
+
+class NpcNamesDatabase:
+    def __init__(self, db_connection = None):
+        if db_connection is None:
+            self.conn = sqlite3.connect('npc_names.db')
+        else:
+            self.conn = db_connection
+        
+        self.conn.row_factory = sqlite3.Row
+        self.cursor = self.conn.cursor()
+        self.initialize_database()
+
+    def _initialize_database(self):
+        # Initialize the database schema
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS npc_names (
+            id INTEGER PRIMARY KEY,
+            name VARCHAR(255) UNIQUE,
+            taken BOOL DEFAULT 0,
+            datetime_created DATETIME DEFAULT CURRENT_TIMESTAMP,
+            datetime_taken DATETIME NULL DEFAULT NULL
+        )
+        ''')
+        self.conn.commit()
+
+    def insert_singular_name(self, name: str) -> 
+
 
 def get_random_untaken_name() -> NameFetchResult:
     try:
@@ -122,9 +154,6 @@ def get_random_untaken_name_and_take_it() -> NameFetchResult:
         log_exception_local(e)
         return NameFetchResult(db_operation_result.GENERAL_ERROR, error_message=str(e))
 
-@dataclass
-class NamesFetchResult(FetchResult):
-    npc_names: List[NpcName] = None
 
 def fetch_names(query_condition: str = "") -> NamesFetchResult:
     try:
