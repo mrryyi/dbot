@@ -210,12 +210,6 @@ def handle_names_functionality(lowered) -> Optional[Response]:
     
     if len(flags) > 1:
         return Response('Only use one flag at a time. Type "name help" for help.')
-    
-    if (take or untake):
-        if len(parts) != 2 or not parts[1].isdigit():
-            return Response('Please provide a valid ID to take.')
-        else:
-            return create_response_take_name(int(parts[1])) if take else create_response_untake_name((parts[1]))
 
     if help:
         return Response('Usage examples: \n'
@@ -226,6 +220,12 @@ def handle_names_functionality(lowered) -> Optional[Response]:
                         '```')
     
     try:
+        if (take or untake):
+            if len(parts) != 2 or not parts[1].isdigit():
+                return Response('Please provide a valid ID to take.')
+            else:
+                return create_response_take_name(parts[1]) if take else create_response_untake_name(parts[1])
+        
         if get_random_untaken_name:
             return create_response_random()
         if get_random_untaken_name_and_take_it:
