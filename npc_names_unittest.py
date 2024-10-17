@@ -16,7 +16,7 @@ class TestNpcNamesDatabase(unittest.TestCase):
 
     def test_insert_singular_name(self):
         result = self.db.insert_singular_name('TestName')
-        self.assertEqual(result, db_operation_result.GENERAL_ERROR)
+        self.assertEqual(result, db_operation_result.SUCCESS)
         # Further assertions...
     
 if __name__ == '__main__':

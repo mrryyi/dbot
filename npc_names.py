@@ -1,8 +1,7 @@
 import sqlite3
-from enum import IntEnum
 from log import *
-from dataclasses import dataclass
 from typing import List, Optional
+from sql_base import *
 
 # Match against SQL data model.
 @dataclass
@@ -14,17 +13,6 @@ class NpcName:
     datetime_taken: Optional[str]  # Optional, since it can be NULL
 #endregion
 #region SQL result helpers.
-class db_operation_result(IntEnum):
-    SUCCESS = 0
-    GENERAL_ERROR = 1
-    ALREADY_EXISTS = 2
-    NO_QUERY_RESULT = 3
-
-@dataclass
-class FetchResult:
-    status: db_operation_result
-    error_message: str = None
-
 @dataclass
 class NameFetchResult(FetchResult):
     npc_name: NpcName = None
