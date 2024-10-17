@@ -220,6 +220,9 @@ def handle_names_functionality(lowered) -> Optional[Response]:
                         '```')
     
     try:
+        if add:
+            return create_response_insert_name(' '.join(parts[1:]))
+
         if (take or untake):
             if len(parts) != 2 or not parts[1].isdigit():
                 return Response('Please provide a valid ID to take.')
