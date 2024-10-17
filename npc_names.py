@@ -49,6 +49,9 @@ class NpcNamesDatabase:
 
 #region SQL Inserts
     def insert_singular_name(self, name: str) -> db_operation_result:
+        if not name:
+            return db_operation_result.GENERAL_ERROR
+
         try:
             self.cursor.execute('''
             INSERT INTO npc_names (name)
