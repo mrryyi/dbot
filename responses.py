@@ -141,7 +141,7 @@ def create_response_several_names(operation: str) -> Optional[Response]:
         return unsuccessful_response(res)
     
     if res.npc_names:
-        message = '\n'.join(npc.name + (' (taken)' if npc.taken else '') for npc in res.npc_names)
+        message = '\n'.join( f'{[npc.id]} ' + npc.name + (' (taken)' if npc.taken else '') for npc in res.npc_names)
     else:
         message = "No names available."
 
