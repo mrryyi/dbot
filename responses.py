@@ -95,14 +95,16 @@ def unsuccessful_response(res: FetchResult) -> Optional[Response]:
     return Response(message=message)
 
 def create_response_random() -> Optional[Response]:
-    res: NameFetchResult = get_random_untaken_name()
+    db_instance = get_db_instance_npc_names()
+    res: NameFetchResult = db_instance.get_random_untaken_name()
     if res.status != db_operation_result.SUCCESS:
         return unsuccessful_response(res)
     
     return Response(message=res.npc_name.name)
 
 def create_response_randomtake() -> Optional[Response]:
-    res: NameFetchResult = get_random_untaken_name_and_take_it()
+    db_instance = get_db_instance_npc_names()
+    res: NameFetchResult = db_instance.get_random_untaken_name_and_take_it()
     if res.status != db_operation_result.SUCCESS:
         return unsuccessful_response(res)
     
@@ -112,7 +114,8 @@ def create_response_insert_name(name_to_add: str) -> Optional[Response]:
     if not name_to_add:
         return Response('Please provide a valid name to add.')
     
-    res: db_operation_result = insert_singular_name(name_to_add)
+    db_instance = get_db_instance_npc_names()
+    res: db_operation_result = db_instance.insert_singular_name(name_to_add)
 
     match res:
         case db_operation_result.SUCCESS:
@@ -123,13 +126,14 @@ def create_response_insert_name(name_to_add: str) -> Optional[Response]:
             return Response(message=f'General SQL error.')   
 
 def create_response_several_names(operation: str) -> Optional[Response]:
+    db_instance = get_db_instance_npc_names()
     match operation:
         case 'all':
-            res: NamesFetchResult = get_all_names()
+            res: NamesFetchResult = db_instance.get_all_names()
         case 'alltaken':
-            res: NamesFetchResult = get_all_taken_names()
+            res: NamesFetchResult = db_instance.get_all_taken_names()
         case 'alluntaken':
-            res: NamesFetchResult = get_all_untaken_names()
+            res: NamesFetchResult = db_instance.get_all_untaken_names()
         case _:
             return
     
