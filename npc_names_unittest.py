@@ -45,6 +45,67 @@ class TestNpcNamesDatabase(unittest.TestCase):
         self.assertEqual(len(res.npc_names), 1)
         self.assertEqual(res.npc_names[0].name, 'TestName!@#$%^&*()')
     #endregion
+    #region take_name
+    def test_take_name(self):
+        self.db.insert_singular_name('TestName')
+        name_res = self.db.get_all_names()
+        name_id = name_res.npc_names[0].id
+        result = self.db.take_name(name_id)
+        self.assertEqual(result.status, db_operation_result.SUCCESS)
+        # Verify the name is now marked as taken
+        name_res = self.db.get_all_taken_names()
+        self.assertEqual(len(name_res.npc_names), 1)
+        self.assertEqual(name_res.npc_names[0].name, 'TestName')
+    
+    def test_take_name_no_name(self):
+        result = self.db.take_name(1)
+        self.assertEqual(result.status, db_operation_result.NO_QUERY_RESULT)
+    
+    def test_take_name_already_taken(self):
+        self.db.insert_singular_name('TestName')
+        name_res = self.db.get_all_names()
+        name_id = name_res.npc_names[0].id
+        self.db.take_name(name_id)
+        result = self.db.take_name(name_id)
+        self.assertEqual(result.status, db_operation_result.ALREADY_TAKEN)
+    #endregion
+    #region untake_name
+    def test_untake_name(self):
+        self.db.insert_singular_name('TestName')
+        name_res = self.db.get_all_names()
+        name_id = name_res.npc_names[0].id
+        self.db.take_name(name_id)
+        result = self.db.untake_name(name_id)
+        self.assertEqual(result.status, db_operation_result.SUCCESS)
+        # Verify the name is now marked as untaken
+        name_res = self.db.get_all_untaken_names()
+        self.assertEqual(len(name_res.npc_names), 1)
+        self.assertEqual(name_res.npc_names[0].name, 'TestName')
+    
+    def test_untake_name_no_name(self):
+        result = self.db.untake_name(1)
+        self.assertEqual(result.status, db_operation_result.NO_QUERY_RESULT)
+    
+    def test_untake_name_already_untaken(self):
+        self.db.insert_singular_name('TestName')
+        name_res = self.db.get_all_names()
+        name_id = name_res.npc_names[0].id
+        result = self.db.untake_name(name_id)
+        self.assertEqual(result.status, db_operation_result.ALREADY_UNTAKEN)
+    #endregion
+    #region get_name_by_id
+    def test_get_name_by_id(self):
+        self.db.insert_singular_name('TestName')
+        name_res = self.db.get_all_names()
+        name_id = name_res.npc_names[0].id
+        result = self.db.get_name_by_id(name_id)
+        self.assertEqual(result.status, db_operation_result.SUCCESS)
+        self.assertEqual(result.npc_name.name, 'TestName')
+
+    def test_get_name_by_id_no_name(self):
+        result = self.db.get_name_by_id(1)
+        self.assertEqual(result.status, db_operation_result.NO_QUERY_RESULT)
+    #endregion
     #region get_random_untaken_name
     def test_get_random_untaken_name(self):
         self.db.insert_singular_name('TestName')

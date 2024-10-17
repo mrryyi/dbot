@@ -20,6 +20,14 @@ class NameFetchResult(FetchResult):
 @dataclass
 class NamesFetchResult(FetchResult):
     npc_names: List[NpcName] = None
+
+@dataclass
+class NameTakeResult(FetchResult):
+    name: str = None
+
+@dataclass
+class NameUnTakeResult(FetchResult):
+    name: str = None
 #endregion
 
 class NpcNamesDatabase:
@@ -71,7 +79,73 @@ class NpcNamesDatabase:
 
         return db_operation_result.SUCCESS
 #endregion
+#region SQL Updates
+    def take_name(self, id_to_take: int) -> NameTakeResult:
+        try:
+            # Check if the name exists and is taken already
+            name_to_take_result = self.get_name_by_id(id_to_take)
+            if name_to_take_result.status != db_operation_result.SUCCESS:
+                return NameTakeResult(status=db_operation_result.NO_QUERY_RESULT)
+            if name_to_take_result.npc_name.taken:
+                return NameTakeResult(name=name_to_take_result.npc_name.name, status=db_operation_result.ALREADY_TAKEN)
+
+            self.cursor.execute('''
+            UPDATE npc_names
+            SET taken = 1, datetime_taken = CURRENT_TIMESTAMP
+            WHERE id = ?
+            ''', (id_to_take,))
+            
+            self.conn.commit()
+            
+            return NameTakeResult(name=name_to_take_result.npc_name.name, status=db_operation_result.SUCCESS)
+            
+        except Exception as e:
+            log_exception_local(e)
+            return NameTakeResult(db_operation_result.GENERAL_ERROR, error_message=str(e))
+    
+    def untake_name(self, id_to_untake: int) -> NameUnTakeResult:
+        try:
+            # Check if the name exists and is untaken already
+            name_to_untake_result = self.get_name_by_id(id_to_untake)
+
+            if name_to_untake_result.status != db_operation_result.SUCCESS:
+                return NameUnTakeResult(status=db_operation_result.NO_QUERY_RESULT)
+            if not name_to_untake_result.npc_name.taken:
+                return NameUnTakeResult(name=name_to_untake_result.npc_name.name, status=db_operation_result.ALREADY_UNTAKEN)
+
+            self.cursor.execute('''
+            UPDATE npc_names
+            SET taken = 0, datetime_taken = NULL
+            WHERE id = ?
+            ''', (id_to_untake,))
+            
+            self.conn.commit()
+            
+            return NameUnTakeResult(name=name_to_untake_result.npc_name.name, status=db_operation_result.SUCCESS)
+            
+        except Exception as e:
+            log_exception_local(e)
+            return NameUnTakeResult(db_operation_result.GENERAL_ERROR, error_message=str(e))
+#endregion
 #region SQL Gets
+    def get_name_by_id(self, id: int) -> NameFetchResult:
+        try:
+            self.cursor.execute('''
+            SELECT id, name, taken, datetime_created, datetime_taken
+            FROM npc_names
+            WHERE id = ?
+            ''', (id,))
+            row = self.cursor.fetchone()
+
+            if row is None:
+                return NameFetchResult(db_operation_result.NO_QUERY_RESULT)
+            
+            return NameFetchResult(db_operation_result.SUCCESS, npc_name=NpcName(*row))
+            
+        except Exception as e:
+            log_exception_local(e)
+            return NameFetchResult(db_operation_result.GENERAL_ERROR, error_message=str(e))
+
     def get_random_untaken_name(self) -> NameFetchResult:
         try:
             self.cursor.execute('''

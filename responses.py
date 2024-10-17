@@ -125,6 +125,40 @@ def create_response_insert_name(name_to_add: str) -> Optional[Response]:
         case db_operation_result.GENERAL_ERROR:
             return Response(message=f'General SQL error.')   
 
+def create_response_take_name(id_to_take: int) -> Optional[Response]:
+    if not id_to_take:
+        return Response('Please provide a valid ID to take.')
+    
+    db_instance = get_db_instance_npc_names()
+    res: db_operation_result = db_instance.take_name(id_to_take)
+
+    match res.status:
+        case db_operation_result.SUCCESS:
+            return Response(message=f'{res.name} [{id_to_take}] taken.')
+        case db_operation_result.ALREADY_TAKEN:
+            return Response(message=f'{res.name} [{id_to_take}] already taken.')
+        case db_operation_result.NO_QUERY_RESULT:
+            return Response(message=f'Name with ID {id_to_take} not found.')
+        case db_operation_result.GENERAL_ERROR:
+            return Response(message=f'General SQL error.')
+
+def create_response_untake_name(id_to_untake: int) -> Optional[Response]:
+    if not id_to_untake:
+        return Response('Please provide a valid ID to untake.')
+    
+    db_instance = get_db_instance_npc_names()
+    res: db_operation_result = db_instance.untake_name(id_to_untake)
+
+    match res.status:
+        case db_operation_result.SUCCESS:
+            return Response(message=f'{res.name} [{id_to_untake}] untaken.')
+        case db_operation_result.ALREADY_UNTAKEN:
+            return Response(message=f'{res.name} [{id_to_untake}] already untaken.')
+        case db_operation_result.NO_QUERY_RESULT:
+            return Response(message=f'Name with ID [{id_to_untake}] not found.')
+        case db_operation_result.GENERAL_ERROR:
+            return Response(message=f'General SQL error.')
+
 def create_response_several_names(operation: str) -> Optional[Response]:
     db_instance = get_db_instance_npc_names()
     match operation:
@@ -146,7 +180,7 @@ def create_response_several_names(operation: str) -> Optional[Response]:
         message = "No names available."
 
     return Response(message=message)
-    
+
 def handle_names_functionality(lowered) -> Optional[Response]:
     parts = lowered[len('name '):].strip().split()
     known_flags = {'add',
@@ -155,13 +189,17 @@ def handle_names_functionality(lowered) -> Optional[Response]:
                    'alluntaken',
                    'random',
                    'randomtake',
-                   'help'}
+                   'help',
+                   'take',
+                   'untake'}
 
     flags = set()
     for part in parts:
         if part in known_flags:
             flags.add(part)
     
+    untake: bool                              = 'untake' in flags
+    take: bool                                = 'take' in flags
     help: bool                                = 'help' in flags
     add: bool                                 = 'add' in flags
     get_random_untaken_name: bool             = 'random' in flags
@@ -173,10 +211,11 @@ def handle_names_functionality(lowered) -> Optional[Response]:
     if len(flags) > 1:
         return Response('Only use one flag at a time. Type "name help" for help.')
     
-    if add:
-         # Everything after add is the name
-        name_to_add = ' '.join(parts[1:]).strip().title()
-        return create_response_insert_name(name_to_add)
+    if (take or untake):
+        if len(parts) != 2 or not parts[1].isdigit():
+            return Response('Please provide a valid ID to take.')
+        else:
+            return create_response_take_name(int(parts[1])) if take else create_response_untake_name((parts[1]))
 
     if help:
         return Response('Usage examples: \n'
