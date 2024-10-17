@@ -11,7 +11,7 @@ class NpcName:
     taken: bool
     datetime_created: str
     datetime_taken: Optional[str]  # Optional, since it can be NULL
-#endregion
+
 #region SQL result helpers.
 @dataclass
 class NameFetchResult(FetchResult):
