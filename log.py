@@ -5,7 +5,7 @@ def log_exception_local(e: Exception = None) -> None:
     print(traceback.format_exc())
 
 def log_warn_local(warn_msg: str) -> None:
-    print(f"[dInternal] [INF] {warn_msg}")
+    print(f"[dInternal] [WARN] {warn_msg}")
 
 def log_inf_local(inf_msg: str) -> None:
     print(f"[dInternal] [INF] {inf_msg}")
