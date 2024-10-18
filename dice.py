@@ -1,8 +1,8 @@
-from random      import randint
+import random
 from dataclasses import dataclass
 import re
 
-from typing      import Optional
+from typing      import Optional, Callable
 from collections import defaultdict
 from itertools   import product
 from io          import BytesIO
@@ -11,12 +11,12 @@ from matplotlib.ticker import MaxNLocator
 
 @dataclass
 class DiceOutcome:
-    _outcome: int
+    outcome: int
 
 @dataclass
 class DiceProbability:
-    _probability: float = None
-    _distribution: dict[int, float] = None
+    probability: Optional[float] = None
+    distribution: Optional[dict[int, float]] = None
 
 @dataclass
 class DiceProbabilityGraph:
@@ -50,12 +50,23 @@ def dice_probability_distribution(dice_to_roll: DiceToRoll) -> dict[int, float]:
     probability_distribution = {sum_: freq / total_outcomes for sum_, freq in frequency_distribution.items()}
     return probability_distribution
 
-def make_probability_graph(probability_distribution: dict[int, float], result: int = None) -> DiceProbabilityGraph:
-    plt.figure(figsize=(10, 6))
-    bars = plt.bar(probability_distribution.keys(), probability_distribution.values(), color='skyblue')
-    plt.xlabel('Possible Result')
-    plt.ylabel('Probability')
-    plt.title('Probability Distribution')
+def prepare_probability_data(probability_distribution: dict[int, float], result: int = None):
+    # Prepare data for plotting
+    data = {
+        'keys': list(probability_distribution.keys()),
+        'values': list(probability_distribution.values()),
+        'highlight': result
+    }
+    return data
+
+def make_probability_graph(probability_distribution: dict[int, float], result: int = None, plotter=plt) -> DiceProbabilityGraph:
+    data = prepare_probability_data(probability_distribution, result)
+    
+    plotter.figure(figsize=(10, 6))
+    bars = plotter.bar(data['keys'], data['values'], color='skyblue')
+    plotter.xlabel('Possible Result')
+    plotter.ylabel('Probability')
+    plotter.title('Probability Distribution')
 
     # Only highlight if the result is present.
     if result:
@@ -70,13 +81,13 @@ def make_probability_graph(probability_distribution: dict[int, float], result: i
     #plt.xticks(ticks=list(probability_distribution.keys()))  # Set all possible results as x-ticks
 
     # in-memory rocks.
-    diceProbabilityGraph = DiceProbabilityGraph
-    diceProbabilityGraph.probability_graph = BytesIO()
-    plt.savefig(diceProbabilityGraph.probability_graph, format='png')
-    diceProbabilityGraph.probability_graph.seek(0)
+    dice_probability_graph = DiceProbabilityGraph()
+    dice_probability_graph.probability_graph = BytesIO()
+    plt.savefig(dice_probability_graph.probability_graph, format='png')
+    dice_probability_graph.probability_graph.seek(0)
     plt.close()
 
-    return diceProbabilityGraph
+    return dice_probability_graph
 
 
 def parse_dice_str(dice_str: str) -> DiceToRoll:
@@ -89,17 +100,19 @@ def parse_dice_str(dice_str: str) -> DiceToRoll:
     return dice_to_roll
 
 def determine_probability(dice_to_roll, specific_result: DiceOutcome = None) -> DiceProbability:
-    diceProbability = DiceProbability 
-    diceProbability._distribution = dice_probability_distribution(dice_to_roll)    
-    diceProbability._probability  = diceProbability._distribution.get(specific_result._outcome, 0.0)
-
+    diceProbability = DiceProbability()
+    diceProbability.distribution = dice_probability_distribution(dice_to_roll)
+    if specific_result:
+        diceProbability.probability  = diceProbability.distribution.get(specific_result.outcome, 0.0)
+    else:
+        diceProbability.probability  = None
     return diceProbability
 
 def get_dice_to_roll(dice_str: str) -> DiceToRoll:
     return parse_dice_str(dice_str)
 
-def decide_outcome_of_dice(dice_to_roll: DiceToRoll) -> DiceOutcome:
-    return DiceOutcome(_outcome = sum(randint(1, dice_to_roll.dice_value) for _ in range(dice_to_roll.amount_of_dice)))
+def decide_outcome_of_dice(dice_to_roll: DiceToRoll, rng: Callable[[int, int], int] = random.randint) -> DiceOutcome:
+    return DiceOutcome(outcome = sum(rng(1, dice_to_roll.dice_value) for _ in range(dice_to_roll.amount_of_dice)))
 
 def dice_within_reasonable_limit(dice_to_roll: DiceToRoll) -> bool:
     if (dice_to_roll.amount_of_dice + dice_to_roll.dice_value) >= 18:

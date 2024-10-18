@@ -58,16 +58,16 @@ def handle_dice_functionality(lowered: str) -> Optional[Response]:
             result:  DiceOutcome = decide_outcome_of_dice(dice_to_roll=dice_to_roll)
 
             diceProbability: DiceProbability = determine_probability (dice_to_roll=dice_to_roll, specific_result=result) 
-            formatted_percentage: str = f"{diceProbability._probability:.2%}"
+            formatted_percentage: str = f"{diceProbability.probability:.2%}"
             
             if not show_only_graph:
-                message: str = f'{dice_str} RESULT: **{result._outcome}** ({formatted_percentage})'
+                message: str = f'{dice_str} RESULT: **{result.outcome}** ({formatted_percentage})'
             else:
                 message: str = f"{dice_str} probability distribution:"
             
             if show_graph:
-                result_for_graph = None if show_only_graph else result._outcome
-                graph = make_probability_graph(diceProbability._distribution, result_for_graph).probability_graph
+                result_for_graph = None if show_only_graph else result.outcome
+                graph = make_probability_graph(diceProbability.distribution, result_for_graph).probability_graph
                 return Response(message=message,
                                 file=File(graph,
                                           filename='probability_distribution.png'))
