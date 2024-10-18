@@ -100,7 +100,7 @@ def create_response_random() -> Optional[Response]:
     if res.status != db_operation_result.SUCCESS:
         return unsuccessful_response(res)
     
-    return Response(message=res.npc_name.name)
+    return Response(message=f'[{res.npc_name.id}] {res.npc_name.name}')
 
 def create_response_randomtake() -> Optional[Response]:
     db_instance = get_db_instance_npc_names()
@@ -108,22 +108,22 @@ def create_response_randomtake() -> Optional[Response]:
     if res.status != db_operation_result.SUCCESS:
         return unsuccessful_response(res)
     
-    return Response(message=res.npc_name.name)
+    return Response(message=f'[{res.npc_name.id}] {res.npc_name.name} (taken)')
 
 def create_response_insert_name(name_to_add: str) -> Optional[Response]:
     if not name_to_add:
         return Response('Please provide a valid name to add.')
     
     db_instance = get_db_instance_npc_names()
-    res: db_operation_result = db_instance.insert_singular_name(name_to_add)
+    res: NameInsertResult = db_instance.insert_singular_name(name_to_add)
 
-    match res:
+    match res.status:
         case db_operation_result.SUCCESS:
-            return Response(message=f'{name_to_add} added.')
+            return Response(message=f'[{res.ID}] {name_to_add} added.')
         case db_operation_result.ALREADY_EXISTS:
-            return Response(message=f'{name_to_add} already exists.')
+            return Response(message=f'[{res.ID}] {name_to_add} already exists.')
         case db_operation_result.GENERAL_ERROR:
-            return Response(message=f'General SQL error.')   
+            return Response(message=f'General SQL error.')
 
 def create_response_take_name(id_to_take: int) -> Optional[Response]:
     if not id_to_take:
@@ -134,9 +134,9 @@ def create_response_take_name(id_to_take: int) -> Optional[Response]:
 
     match res.status:
         case db_operation_result.SUCCESS:
-            return Response(message=f'{res.name} [{id_to_take}] taken.')
+            return Response(message=f'[{id_to_take}] {res.name} taken.')
         case db_operation_result.ALREADY_TAKEN:
-            return Response(message=f'{res.name} [{id_to_take}] already taken.')
+            return Response(message=f'[{id_to_take}] {res.name} already taken.')
         case db_operation_result.NO_QUERY_RESULT:
             return Response(message=f'Name with ID {id_to_take} not found.')
         case db_operation_result.GENERAL_ERROR:
@@ -151,9 +151,9 @@ def create_response_untake_name(id_to_untake: int) -> Optional[Response]:
 
     match res.status:
         case db_operation_result.SUCCESS:
-            return Response(message=f'{res.name} [{id_to_untake}] untaken.')
+            return Response(message=f'[{id_to_untake}] {res.name} untaken.')
         case db_operation_result.ALREADY_UNTAKEN:
-            return Response(message=f'{res.name} [{id_to_untake}] already untaken.')
+            return Response(message=f'[{id_to_untake}] {res.name} already untaken.')
         case db_operation_result.NO_QUERY_RESULT:
             return Response(message=f'Name with ID [{id_to_untake}] not found.')
         case db_operation_result.GENERAL_ERROR:
@@ -175,7 +175,7 @@ def create_response_several_names(operation: str) -> Optional[Response]:
         return unsuccessful_response(res)
     
     if res.npc_names:
-        message = '\n'.join( f'{[npc.id]} ' + npc.name + (' (taken)' if npc.taken else '') for npc in res.npc_names)
+        message = '\n'.join( f'[{npc.id}] ' + npc.name + (' (taken)' if npc.taken else '') for npc in res.npc_names)
     else:
         message = "No names available."
 
@@ -186,7 +186,7 @@ def handle_names_functionality(lowered) -> Optional[Response]:
     known_flags = {'help',
                    'add',
                    'take',
-                   'untake'
+                   'untake',
                    'random',
                    'randomtake',
                    'all',
