@@ -2,6 +2,7 @@ import sqlite3
 from log import *
 from typing import List, Optional
 from sql_base import *
+import threading
 
 # Match against SQL data model.
 @dataclass
@@ -13,6 +14,11 @@ class NpcName:
     datetime_taken: Optional[str]  # Optional, since it can be NULL
 
 #region SQL result helpers.
+
+@dataclass
+class NameInsertResult(FetchResult):
+    ID: int = None
+
 @dataclass
 class NameFetchResult(FetchResult):
     npc_name: NpcName = None
@@ -28,11 +34,12 @@ class NameTakeResult(FetchResult):
 @dataclass
 class NameUnTakeResult(FetchResult):
     name: str = None
+
 #endregion
 
 class NpcNamesDatabase:
     _instance = None  # Class-level attribute for singleton
-
+    _db_lock = threading.Lock()
     def __new__(cls, db_connection=None, reset_instance=False):
         if cls._instance is None or reset_instance:
             cls._instance = super(NpcNamesDatabase, cls).__new__(cls)
@@ -56,28 +63,30 @@ class NpcNamesDatabase:
         self.conn.commit()
 
 #region SQL Inserts
-    def insert_singular_name(self, name: str) -> db_operation_result:
+    def insert_singular_name(self, name: str) -> NameInsertResult:
         if not name:
             return db_operation_result.GENERAL_ERROR
 
         try:
-            self.cursor.execute('''
-            INSERT INTO npc_names (name)
-            VALUES (?)
-            ''', (name,))
+            with self._db_lock:
+                self.cursor.execute('''
+                INSERT INTO npc_names (name)
+                VALUES (?)
+                ''', (name,))
 
-            self.conn.commit()
+                self.conn.commit()
+                inserted_id: int = self.cursor.lastrowid
 
         except sqlite3.IntegrityError as e:
             if "UNIQUE" in str(e):
-                return db_operation_result.ALREADY_EXISTS
+                return NameInsertResult(status=db_operation_result.ALREADY_EXISTS)
             else:
                 log_exception_local(e)
-                return db_operation_result.GENERAL_ERROR
+                return NameInsertResult(status=db_operation_result.GENERAL_ERROR)
         except Exception as e:
             log_exception_local(e)
 
-        return db_operation_result.SUCCESS
+        return NameInsertResult(status=db_operation_result.SUCCESS, ID=inserted_id)
 #endregion
 #region SQL Updates
     def take_name(self, id_to_take: int) -> NameTakeResult:
