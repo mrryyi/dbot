@@ -65,7 +65,7 @@ class NpcNamesDatabase:
 #region SQL Inserts
     def insert_singular_name(self, name: str) -> NameInsertResult:
         if not name:
-            return db_operation_result.GENERAL_ERROR
+            return NameInsertResult(status=db_operation_result.GENERAL_ERROR)
 
         try:
             with self._db_lock:

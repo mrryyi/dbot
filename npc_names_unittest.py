@@ -17,7 +17,8 @@ class TestNpcNamesDatabase(unittest.TestCase):
     #region insert_singular_name
     def test_insert_singular_name(self):
         result = self.db.insert_singular_name('TestName')
-        self.assertEqual(result, db_operation_result.SUCCESS)
+        self.assertEqual(result.status, db_operation_result.SUCCESS)
+        self.assertEqual(result.ID, 1)
         # Verify that the name exists in the database
         res = self.db.get_all_names()
         self.assertEqual(len(res.npc_names), 1)
@@ -25,21 +26,21 @@ class TestNpcNamesDatabase(unittest.TestCase):
     
     def test_insert_singular_name_duplicate(self):
         result = self.db.insert_singular_name('TestName')
-        self.assertEqual(result, db_operation_result.SUCCESS)
+        self.assertEqual(result.status, db_operation_result.SUCCESS)
         result = self.db.insert_singular_name('TestName')
-        self.assertEqual(result, db_operation_result.ALREADY_EXISTS)
+        self.assertEqual(result.status, db_operation_result.ALREADY_EXISTS)
     
     def test_insert_singular_name_empty_string(self):
         result = self.db.insert_singular_name('')
-        self.assertEqual(result, db_operation_result.GENERAL_ERROR)
+        self.assertEqual(result.status, db_operation_result.GENERAL_ERROR)
     
     def test_insert_singular_name_none_value(self):
         result = self.db.insert_singular_name(None)
-        self.assertEqual(result, db_operation_result.GENERAL_ERROR)
+        self.assertEqual(result.status, db_operation_result.GENERAL_ERROR)
     
     def test_insert_singular_name_special_characters(self):
         result = self.db.insert_singular_name('TestName!@#$%^&*()')
-        self.assertEqual(result, db_operation_result.SUCCESS)
+        self.assertEqual(result.status, db_operation_result.SUCCESS)
         # Verify that the name exists in the database
         res = self.db.get_all_names()
         self.assertEqual(len(res.npc_names), 1)
