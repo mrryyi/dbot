@@ -31,13 +31,13 @@ Examples:
 
 name add kassler knasboll - adds an untaken name, 'Kassler Knasboll'
 name add kASSler kNaSbOlL - ignores case, becomes 'Kassler Knasboll' anyway
-name all                  - lists all names
-name alltaken             - lists all taken names
-name alluntaken           - lists all untaken names
 name take 32              - takes the name with ID 32
 name untake 57            - takes the name with ID 57
 name random               - gives a random untaken name
 name randomtake           - takes the name that is randomed, so it won't show up in untaken searches 
+name all                  - lists all names
+name alltaken             - lists all taken names
+name alluntaken           - lists all untaken names
 
 names are displayed with ID:s in "name all..." operations.
 ```
