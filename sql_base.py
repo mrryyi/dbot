@@ -6,7 +6,6 @@ class db_operation_result(IntEnum):
     GENERAL_ERROR = 1
     ALREADY_EXISTS = 2
     NO_QUERY_RESULT = 3
-    # Error code for attempting to take a name that is already taken
     ALREADY_TAKEN = 4
     ALREADY_UNTAKEN = 5
 
