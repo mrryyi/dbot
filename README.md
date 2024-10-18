@@ -24,7 +24,7 @@ Graph is generated in-memory and does not need to be stored to save our precious
 
 Did your players just wonder what your barmaid is called? Or what asked what name their summoned rat has?
 
-No worries! Just type use this bot to 
+No worries! Just use the bot like this: 
 
 ```
 Examples:
@@ -34,8 +34,12 @@ name add kASSler kNaSbOlL - ignores case, becomes 'Kassler Knasboll' anyway
 name all                  - lists all names
 name alltaken             - lists all taken names
 name alluntaken           - lists all untaken names
+name take 32              - takes the name with ID 32
+name untake 57            - takes the name with ID 57
 name random               - gives a random untaken name
 name randomtake           - takes the name that is randomed, so it won't show up in untaken searches 
+
+names are displayed with ID:s in "name all..." operations.
 ```
 
 ## Prerequisites for building

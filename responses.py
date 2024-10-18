@@ -183,25 +183,26 @@ def create_response_several_names(operation: str) -> Optional[Response]:
 
 def handle_names_functionality(lowered) -> Optional[Response]:
     parts = lowered[len('name '):].strip().split()
-    known_flags = {'add',
+    known_flags = {'help',
+                   'add',
+                   'take',
+                   'untake'
+                   'random',
+                   'randomtake',
                    'all',
                    'alltaken',
                    'alluntaken',
-                   'random',
-                   'randomtake',
-                   'help',
-                   'take',
-                   'untake'}
+                   }
 
     flags = set()
     for part in parts:
         if part in known_flags:
             flags.add(part)
     
-    untake: bool                              = 'untake' in flags
-    take: bool                                = 'take' in flags
     help: bool                                = 'help' in flags
     add: bool                                 = 'add' in flags
+    take: bool                                = 'take' in flags
+    untake: bool                              = 'untake' in flags
     get_random_untaken_name: bool             = 'random' in flags
     get_random_untaken_name_and_take_it: bool = 'randomtake' in flags
     get_all_names: bool                       = 'all' in flags 
@@ -214,9 +215,14 @@ def handle_names_functionality(lowered) -> Optional[Response]:
     if help:
         return Response('Usage examples: \n'
                         '```'
-                        '"name random" - get a random untaken name.\n'
-                        '"name all"    - gets all untaken names.\n'
-                        '"name add Bert Randman" - Adds "Bert Randman" as an untaken name'
+                        '"name add Bert Randman" - Adds "Bert Randman" as an untaken name\n'
+                        '"name take 32"          - takes the name with ID 32.\n'
+                        '"name untake 57"        - untakes the name with ID 57.\n'
+                        '"name random"           - get a random untaken name.\n'
+                        '"name randomtake"       - get a random untaken name and take it.\n'
+                        '"name all"              - gets all names.\n'
+                        '"name alltaken"         - gets all taken names.\n'
+                        '"name alluntaken"       - gets all untaken names.\n'
                         '```')
     
     try:
