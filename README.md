@@ -32,7 +32,7 @@ Examples:
 name add kassler knasboll - adds an untaken name, 'Kassler Knasboll'
 name add kASSler kNaSbOlL - ignores case, becomes 'Kassler Knasboll' anyway
 name take 32              - takes the name with ID 32
-name untake 57            - takes the name with ID 57
+name untake 57            - untakes the name with ID 57
 name random               - gives a random untaken name
 name randomtake           - takes the name that is randomed, so it won't show up in untaken searches 
 name all                  - lists all names
