@@ -78,23 +78,7 @@ def handle_dice_functionality(lowered: str) -> Optional[Response]:
 #endregion
 #region npc_names
 def unsuccessful_response(res: FetchResult) -> Optional[Response]:
-    nicer_status_text: str
-    match res.status:
-        # Doesn't make sense, but it's here for completeness in case this gets called with a success status
-        case db_operation_result.SUCCESS:
-            nicer_status_text = 'Success.'
-        case db_operation_result.GENERAL_ERROR:
-            nicer_status_text = 'General SQL error.'
-        case db_operation_result.ALREADY_EXISTS:
-            nicer_status_text = 'Already exists.'
-        case db_operation_result.NO_QUERY_RESULT:
-            nicer_status_text = 'No data found.'
-        case db_operation_result.ALREADY_TAKEN:
-            nicer_status_text = 'Already taken.'
-        case db_operation_result.ALREADY_UNTAKEN:
-            nicer_status_text = 'Already untaken.'
-        case _:
-            nicer_status_text = 'Unknown DB operation error.'
+    nicer_status_text: str = res.status.status_text
     
     message: str
     if res.error_message is None:
