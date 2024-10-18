@@ -39,7 +39,7 @@ name all                  - lists all names
 name alltaken             - lists all taken names
 name alluntaken           - lists all untaken names
 
-names are displayed with ID:s in "name all..." operations.
+names are displayed to the user with ID:s.
 ```
 
 ## Prerequisites for building
