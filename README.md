@@ -52,3 +52,13 @@ pip install python-dotenv
 pip install matplotlib
 pip install sqlite3
 ```
+
+## Discord API Token
+
+You'll need to have an ".env" file in the same directory as disc.py
+
+.env should have at least this:
+
+```
+DISCORD_TOKEN=ABCDEFGHIJKLMNOPQRSTUVWXYZ.example.UsEYoUrOwNdIsCoRdToKeNfOrYoUrBot
+```
