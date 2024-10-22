@@ -103,7 +103,7 @@ def create_response_randomtake() -> Optional[Response]:
     
     return Response(message=f'[{res.npc_name.id}] {res.npc_name.name} (taken)')
 
-def create_response_insert_name(name_to_add: str) -> Optional[Response]:
+def create_response_add_name(name_to_add: str) -> Optional[Response]:
     if not name_to_add:
         return Response('Please provide a valid name to add.')
     
@@ -220,7 +220,7 @@ def handle_names_functionality(lowered) -> Optional[Response]:
     
     try:
         if add:
-            return create_response_insert_name(' '.join(parts[1:]))
+            return create_response_add_name(' '.join(parts[1:]))
 
         if (take or untake):
             if len(parts) != 2 or not parts[1].isdigit():
